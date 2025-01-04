@@ -20,6 +20,8 @@ return new class extends Migration
             $table->string('nik');
             $table->integer('quantity');
             $table->decimal('total_price', 10, 2);
+            $table->enum('status', ['pending', 'success', 'failed'])->default('pending');
+            $table->string('snap_token')->nullable();
             $table->timestamps();
         });
     }

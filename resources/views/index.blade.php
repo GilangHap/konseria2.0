@@ -76,7 +76,6 @@
                         <p class="card-text"><i class="bi bi-calendar2-week"></i> {{ $event->date }}</p>
                         <p class="card-text"><i class="bi bi-geo-alt-fill"></i> {{ $event->location }}</p>
                         <p class="card-text fw-bold text-primary"><i class="bi bi-cash"></i> {{ formatRupiah($event->price) }}</p>
-                        {{-- <a href="{{ route('events.show', $event->id) }}"><button class="btn btn-primary">Beli Tiket</button></a> --}}
                         @if($event->ticket_quota > 0)
                             <a href="{{ route('events.show', $event->id) }}" class="btn btn-primary">Purchase Ticket</a>
                         @else

@@ -1,15 +1,10 @@
 <x-layout>
     <x-slot:title>Transaction Details</x-slot>
 
-    <div class="container md-5">
+    <div class="container my-5">
         <div class="row">
             <div class="col-md-8 offset-md-2">
                 <h1 class="text-primary fw-bold text-center my-2">Transaction Details</h1>
-                @if(session('status'))
-                    <div class="alert alert-success">
-                        {{ session('status') }}
-                    </div>
-                @endif              
                 <div class="card p-4 mb-4 shadow-m rounded-2">
                     <h3 class="mb-1 fw-bold">Transaction Information</h3>
                     <hr class="border border-primary border-3 opacity-75">
@@ -41,54 +36,17 @@
         </div>
     </div>
 
-    <style>
-        body {
-            background-color: #f9f9f9;
-        }
-        .card {
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        .ticket {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            display: flex;
-            align-items: center;
-            padding: 15px;
-            position: relative;
-        }
-        .ticket-info {
-            flex: 1;
-        }
-        .tear-line {
-            width: 2px;
-            height: 100%;
-            background: repeating-linear-gradient(
-                to bottom,
-                white,
-                white 8px,
-                black 8px,
-                black 12px
-            );
-            position: absolute;
-            left: 80%;
-        }
-        .qr-code {
-            margin-left: auto;
-            margin-right: auto;
-        }
-        .btn-primary {
-            background-color: #6c63ff;
-            border: none;
-        }
-        .btn-primary:hover {
-            background-color: #5848c2;
-        }
-        .custom-hr {
-            border: 2px solid blue;
-            border-radius: 5px;
-        }
-    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Display success alert if there is a success message
+            @if(session('success'))
+                Swal.fire({
+                    title: 'Success',
+                    text: '{{ session('success') }}',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                });
+            @endif
+        });
+    </script>
 </x-layout>

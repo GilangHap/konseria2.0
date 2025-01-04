@@ -1,14 +1,14 @@
 <x-layout>
     <x-slot:title>Konseria - Payment</x-slot>
 
-    <div class="container">
+    <div class="container my-5">
         <div class="row">
             <h1 class="text-primary fw-bold text-center my-2">Ticket Cart</h1>
         </div>
         <div class="row">
             <div class="card col-lg-7 rounded-2 shadow mb-4 p-4"> 
                 <h3 class="text-center my-2">Personal Data</h3>
-                <form action="{{ route('payment.process') }}" method="post" id="payment-form">
+                <form action="{{ route('payment.generateSnapToken') }}" method="post" id="payment-form">
                     @csrf
                     <input type="hidden" name="event_id" value="{{ $event->id }}">
                     <div class="mb-3">
@@ -55,13 +55,45 @@
                         <p class="fw-semibold">Total</p>
                         <p class="fw-semibold" id="total">Rp {{ number_format($event->price + 5000, 0, ',', '.') }}</p>
                     </div>
-                    <button type="submit" class="btn btn-primary w-100 mt-3">Proceed to Payment</button>
+                    <button type="submit" class="btn btn-primary w-100 mt-3" id="pay-button">Proceed to Payment</button>
                 </div>
                 </form>
             </div>
         </div>
     </div>
-
+    <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ env('MIDTRANS_CLIENT_KEY') }}"></script>
+    <script type="text/javascript">
+        document.getElementById('pay-button').onclick = function(){
+          // SnapToken acquired from the server
+          snap.pay('{{ $transaction->snap_token ?? '' }}', {
+            // Optional
+            onSuccess: function(result){
+              Swal.fire({
+                title: 'Payment Successful',
+                text: 'Your payment has been successfully processed.',
+                icon: 'success',
+                confirmButtonText: 'OK',
+              }).then(() => window.location.href = '{{ route('transaction.details', $transaction->uuid ?? '') }}');
+            },
+            onPending: function(result){
+              Swal.fire({
+                title: 'Payment Pending',
+                text: 'Please complete your payment.',
+                icon: 'info',
+                confirmButtonText: 'OK',
+              });
+            },
+            onError: function(result){
+              Swal.fire({
+                title: 'Payment Failed',
+                text: 'An error occurred. Please try again.',
+                icon: 'error',
+                confirmButtonText: 'OK',
+              });
+            }
+          });
+        };
+    </script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const quantityInput = document.getElementById('quantity');
@@ -135,6 +167,15 @@
                     title: 'Error',
                     text: '{{ session('error') }}',
                     icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            @endif
+
+            @if(session('success'))
+                Swal.fire({
+                    title: 'Success',
+                    text: '{{ session('success') }}',
+                    icon: 'success',
                     confirmButtonText: 'OK'
                 });
             @endif

@@ -7,6 +7,9 @@ use App\Models\Event;
 use App\Models\Transaction;
 use App\Models\Ticket;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use App\Mail\ReceipMail;
+use Illuminate\Support\Facades\Mail;
+use Midtrans;
 
 class PaymentController extends Controller
 {
@@ -16,7 +19,7 @@ class PaymentController extends Controller
         return view('payment', compact('event'));
     }
 
-    public function process(Request $request)
+    public function generateSnapToken(Request $request)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -49,7 +52,28 @@ class PaymentController extends Controller
         $event->ticket_quota -= $request->quantity;
         $event->save();
 
-        return redirect()->route('transaction.details', $transaction->uuid)->with('success', 'Payment processed successfully!');
+        // Set your Merchant Server Key
+        \Midtrans\Config::$serverKey = config('midtrans.server_key');
+        \Midtrans\Config::$isProduction = false;
+        \Midtrans\Config::$isSanitized = true;
+        \Midtrans\Config::$is3ds = true;
+
+        $params = [
+            'transaction_details' => [
+                'order_id' => $transaction->uuid,
+                'gross_amount' => $transaction->total_price,
+            ],
+            'customer_details' => [
+                'first_name' => $transaction->name,
+                'email' => $transaction->email,
+            ],
+        ];
+
+        $snapToken = \Midtrans\Snap::getSnapToken($params);
+        $transaction->snap_token = $snapToken;
+        $transaction->save();
+
+        return view('payment', compact('event', 'transaction'))->with('success', 'Snap token generated successfully.');
     }
 
     public function transactionDetails($uuid)

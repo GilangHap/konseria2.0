@@ -10,6 +10,7 @@
         "filament/filament": "^3.2",
         "laravel/framework": "^11.31",
         "laravel/tinker": "^2.9",
+        "midtrans/midtrans-php": "^2.6",
         "rupadana/filament-api-service": "^3.3",
         "simplesoftwareio/simple-qrcode": "^4.2"
     },

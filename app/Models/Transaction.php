@@ -18,6 +18,8 @@ class Transaction extends Model
         'quantity',
         'total_price',
         'uuid',
+        'status',
+        'snap_token',
     ];
 
     protected static function boot()
