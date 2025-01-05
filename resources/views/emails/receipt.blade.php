@@ -155,8 +155,7 @@
             @endforeach
 
             <div class="cta">
-                {{-- {{ route('download.ticket', $transaction->id) }} --}}
-                <a href="">Download Your Tickets</a>
+                <a href="{{ route('transaction.download', $transaction->uuid) }}">Download Your Tickets</a>
             </div>
         </div>
         <div class="footer">

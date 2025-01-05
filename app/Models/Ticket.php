@@ -13,6 +13,7 @@ class Ticket extends Model
         'transaction_id',
         'event_id',
         'ticket_code',
+        'qr_code',
         'is_redeemed',
     ];
 

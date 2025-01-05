@@ -63,35 +63,105 @@
     </div>
     <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ env('MIDTRANS_CLIENT_KEY') }}"></script>
     <script type="text/javascript">
-        document.getElementById('pay-button').onclick = function(){
-          // SnapToken acquired from the server
-          snap.pay('{{ $transaction->snap_token ?? '' }}', {
-            // Optional
-            onSuccess: function(result){
-              Swal.fire({
-                title: 'Payment Successful',
-                text: 'Your payment has been successfully processed.',
-                icon: 'success',
-                confirmButtonText: 'OK',
-              }).then(() => window.location.href = '{{ route('transaction.details', $transaction->uuid ?? '') }}');
-            },
-            onPending: function(result){
-              Swal.fire({
-                title: 'Payment Pending',
-                text: 'Please complete your payment.',
+        document.getElementById('pay-button').onclick = function(event){
+            event.preventDefault();
+            const paymentForm = document.getElementById('payment-form');
+            
+            // Calculate total price including admin fee
+            const quantity = parseInt(document.getElementById('quantity').value);
+            const ticketPrice = {{ $event->price }};
+            const adminFee = 5000;
+            const totalPrice = (ticketPrice + adminFee) * quantity;
+
+            // Append total price to the form
+            const totalPriceInput = document.createElement('input');
+            totalPriceInput.type = 'hidden';
+            totalPriceInput.name = 'total_price';
+            totalPriceInput.value = totalPrice;
+            paymentForm.appendChild(totalPriceInput);
+
+            // Show loading alert
+            Swal.fire({
+                title: 'Processing Payment',
+                text: 'Please wait...',
                 icon: 'info',
-                confirmButtonText: 'OK',
-              });
-            },
-            onError: function(result){
-              Swal.fire({
-                title: 'Payment Failed',
-                text: 'An error occurred. Please try again.',
-                icon: 'error',
-                confirmButtonText: 'OK',
-              });
-            }
-          });
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                onBeforeOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            // Submit the form to generate SnapToken
+            fetch('{{ route('payment.generateSnapToken') }}', {
+                method: 'POST',
+                body: new FormData(paymentForm),
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.snapToken) {
+                    // SnapToken acquired from the server
+                    snap.pay(data.snapToken, {
+                        // Optional
+                        onSuccess: function(result){
+                            // Update transaction status in the database
+                            fetch('{{ url('transaction/update-status') }}/' + data.transaction_uuid, {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({ status: 'success' })
+                            })
+                            .then(() => {
+                                Swal.fire({
+                                    title: 'Payment Successful',
+                                    text: 'Your payment has been successfully processed. Transaction details have been sent to your email.',
+                                    icon: 'success',
+                                    confirmButtonText: 'OK',
+                                }).then(() => window.location.href = '{{ url('transaction') }}/' + data.transaction_uuid);
+                            });
+                        },
+                        onPending: function(result){
+                            Swal.fire({
+                                title: 'Payment Pending',
+                                text: 'Please complete your payment.',
+                                icon: 'info',
+                                confirmButtonText: 'OK',
+                            });
+                        },
+                        onError: function(result){
+                            Swal.fire({
+                                title: 'Payment Failed',
+                                text: 'An error occurred. Please try again.',
+                                icon: 'error',
+                                confirmButtonText: 'OK',
+                            });
+                        },
+                        onClose: function(){
+                            // Handle the close event
+                        }
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Failed to generate SnapToken. Please try again.',
+                        icon: 'error',
+                        confirmButtonText: 'OK',
+                    });
+                }
+            })
+            .catch(error => {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'An error occurred. Please try again.',
+                    icon: 'error',
+                    confirmButtonText: 'OK',
+                });
+            });
         };
     </script>
     <script>

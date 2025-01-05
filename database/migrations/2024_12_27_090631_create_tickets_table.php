@@ -16,7 +16,8 @@ return new class extends Migration
             $table->foreignId('transaction_id')->constrained('transactions')->onDelete('cascade');
             $table->foreignId('event_id')->constrained('events')->onDelete('cascade');
             $table->string('ticket_code')->unique();
-            $table->boolean('is_redeemed')->default(false); // Tambahkan kolom ini
+            $table->boolean('is_redeemed')->default(false);
+            $table->text('qr_code')->nullable(); // Tambahkan kolom ini
             $table->timestamps();
         });
     }

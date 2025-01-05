@@ -62,6 +62,7 @@ class TransactionResource extends Resource
                 TextColumn::make('nik')->label('NIK')->sortable()->searchable(),
                 TextColumn::make('quantity')->label('Quantity')->sortable()->searchable(),
                 TextColumn::make('total_price')->label('Total Price')->prefix('Rp ')->sortable()->searchable(),
+                TextColumn::make('status')->label('Status')->sortable()->searchable(),
                 TextColumn::make('created_at')->label('Created At')->sortable()->dateTime('F j, Y, g:i a')->searchable(),
                 ])
             ->filters([

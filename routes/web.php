@@ -18,16 +18,15 @@ Route::get('/events/{id}', [EventController::class, 'show'])->name('events.show'
 // Rute untuk pembayaran
 Route::get('/payment/{event}', [PaymentController::class, 'show'])->name('payment.show');
 Route::post('/payment/generate-snap-token', [PaymentController::class, 'generateSnapToken'])->name('payment.generateSnapToken');
+Route::post('/payment/notification', [PaymentController::class, 'handleNotification'])->name('payment.notification');
+Route::get('/payment/transaction/{transaction}', [PaymentController::class, 'showTransaction'])->name('payment.showTransaction');
 
 // Rute untuk transaksi
 Route::get('/transaction/{uuid}', [PaymentController::class, 'transactionDetails'])->name('transaction.details');
 
+// Rute untuk download tiket
+Route::get('/transaction/{uuid}/download', [PaymentController::class, 'downloadTicket'])->name('transaction.download');
+
 // Rute untuk verifikasi tiket
 Route::post('/tickets/verify', [TicketController::class, 'verify'])->name('ticket.verify');
 
-// Rute untuk admin panel (Filament)
-Route::middleware(['auth', Authenticate::class])->group(function () {
-    Route::get('/admin', function () {
-        return redirect()->route('filament.resources.events.create');
-    })->name('filament.resources.events.create');
-});
